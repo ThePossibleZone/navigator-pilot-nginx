@@ -1,0 +1,20 @@
+# syntax=docker/dockerfile:1.4
+
+# FROM alpine/git AS builder
+
+# RUN mkdir -p /root/.ssh && chmod 0700 /root/.ssh && ssh-keyscan github.com >> /root/.ssh/known_hosts
+
+# RUN --mount=type=bind,source=./config,target=/root/.ssh/config \
+#     --mount=type=ssh \
+#     ssh-keyscan github.com >> /root/.ssh/known_hosts && \
+#     git clone git@github-navigator-api:ThePossibleZone/navigator-api.git /app
+
+FROM node:22-alpine
+
+WORKDIR /app
+
+COPY ./repos/navigator-api .
+
+RUN npm install
+
+EXPOSE 3333

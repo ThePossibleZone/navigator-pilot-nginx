@@ -1,0 +1,35 @@
+# syntax=docker/dockerfile:1.4
+
+# FROM alpine/git AS builder
+
+# RUN mkdir -p /root/.ssh && chmod 0700 /root/.ssh && ssh-keyscan github.com >> /root/.ssh/known_hosts
+
+# RUN --mount=type=bind,source=./config,target=/root/.ssh/config \
+#     --mount=type=ssh \
+#     ssh-keyscan github.com >> /root/.ssh/known_hosts && \
+#     git clone git@github-navigator-web:ThePossibleZone/navigator-web.git /app
+
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Also install navigator-shared
+
+COPY ./repos/navigator-web ./navigator-web
+
+COPY ./repos/navigator-shared ./navigator-shared
+
+# Build navigator-shared and create a package
+RUN cd navigator-shared && npm install && npm run build && npm pack
+
+# Install the packed navigator-shared package in navigator-web
+RUN cd navigator-web && npm install ../navigator-shared/navigator-shared-1.0.0.tgz
+
+# Install remaining dependencies
+RUN cd navigator-web && npm install
+
+EXPOSE 5173
+
+WORKDIR /app/navigator-web
+
+CMD ["yarn", "dev"]

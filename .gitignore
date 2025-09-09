@@ -1,0 +1,7 @@
+.env.*
+!.env.example
+persist/
+init-aws.sh/
+repos/
+pgdata/
+uploads/

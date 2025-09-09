@@ -1,0 +1,134 @@
+# Docker Compose configuration for the Navigator Pilot Container
+# Designed to run the Navigator stack in a single container
+# to simplify AWS deployment and management.
+
+# This setup includes:
+# - A PostgreSQL database for persistent storage
+# - AdonisJS backend service: https://github.com/ThePossibleZone/navigator-api
+# - Vite-powered React frontend: https://github.com/ThePossibleZone/navigator-web
+# - Letta service for AI tool execution and memory/state management
+# - LocalStack for local AWS service emulation
+# - A simple Nginx reverse proxy to route traffic
+
+# docker-compose.yml
+networks:
+  navigator-network:
+    driver: bridge
+
+services: 
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: navigator-postgres
+    environment:
+      POSTGRES_USER: navigator
+      POSTGRES_PASSWORD: navigatorpassword
+      POSTGRES_DB: navigator
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    expose:
+      - "5432"
+    networks:
+      - navigator-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U navigator"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  localstack:
+    container_name: navigator-localstack
+    image: localstack/localstack:latest
+    expose:
+      - "4566"
+    env_file:
+      - .env.localstack
+    volumes:
+      - ./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
+    networks:
+      - navigator-network
+
+  navigator-api:
+    container_name: navigator-api
+    build: 
+      context: .
+      dockerfile: Dockerfile.api
+    env_file:
+      - .env.api
+    ports:
+      - "3333:3333"
+    volumes:
+      - ./uploads:/app/public/uploads
+    command: >
+      sh -c  "node ace migration:run --force &&
+              node ace serve --watch"
+    networks:
+      - navigator-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      letta:
+        condition: service_healthy
+
+  letta:
+    # Build the image from the Dockerfile in the current directory.
+    # The image will be tagged as 'letta-with-tools'.
+    image: tpzmiles/letta-with-tools:latest
+    container_name: navigator-letta
+    expose:
+      - "8283"
+    env_file:
+      - ".env.letta"
+    # volumes:
+      # # This volume is still needed as it's for persistent PostgreSQL data.
+      # - ~/.letta/.persist/pgdata:/var/lib/postgresql/data
+    networks:
+      - navigator-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8283/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  tool_registrar:
+    image: letta-with-tools:latest
+    depends_on:
+      letta:
+        condition: service_healthy
+    environment:
+      - LETTA_BASE_URL=http://letta:8283
+    command: python3 /app/register_tools.py
+    restart: "no"
+    networks:
+      - navigator-network
+
+  navigator-web:
+    container_name: navigator-web
+    build: 
+      context: .
+      dockerfile: Dockerfile.web
+    env_file:
+      - .env.web
+    ports:
+      - "5173:5173"
+    networks:
+      - navigator-network
+
+  nginx:
+    image: nginx:latest
+    container_name: navigator-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - navigator-network
+    depends_on:
+      - postgres
+      - navigator-api
+      - navigator-web
+      - letta

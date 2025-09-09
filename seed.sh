@@ -1,0 +1,1 @@
+docker compose run navigator-api node ace db:seed
