@@ -2,7 +2,7 @@
 This README was written by hand with love. Thanks so much for helping us get this online. 
 
 ### Deploying
-1. Clone this repo into a Linux/Arm64 environment with Docker installed.
+1. Clone this repo into a Linux/**Arm64** environment with Docker installed.
 ```
 git clone https://github.com/ThePossibleZone/navigator-pilot-nginx.git
 ```
