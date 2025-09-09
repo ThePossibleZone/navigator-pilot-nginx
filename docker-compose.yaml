@@ -67,44 +67,44 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      letta:
-        condition: service_healthy
+      # letta:
+      #   condition: service_healthy
 
-  letta:
-    # Build the image from the Dockerfile in the current directory.
-    # The image will be tagged as 'letta-with-tools'.
-    image: tpzmiles/letta-with-tools:latest
-    container_name: navigator-letta
-    expose:
-      - "8283"
-    env_file:
-      - ".env.letta"
-    # volumes:
-      # # This volume is still needed as it's for persistent PostgreSQL data.
-      # - ~/.letta/.persist/pgdata:/var/lib/postgresql/data
-    networks:
-      - navigator-network
-    depends_on:
-      postgres:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8283/v1/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+  # letta:
+  #   # Build the image from the Dockerfile in the current directory.
+  #   # The image will be tagged as 'letta-with-tools'.
+  #   image: tpzmiles/letta-with-tools:latest
+  #   container_name: navigator-letta
+  #   expose:
+  #     - "8283"
+  #   env_file:
+  #     - ".env.letta"
+  #   # volumes:
+  #     # # This volume is still needed as it's for persistent PostgreSQL data.
+  #     # - ~/.letta/.persist/pgdata:/var/lib/postgresql/data
+  #   networks:
+  #     - navigator-network
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8283/v1/health"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #     start_period: 30s
 
-  tool_registrar:
-    image: letta-with-tools:latest
-    depends_on:
-      letta:
-        condition: service_healthy
-    environment:
-      - LETTA_BASE_URL=http://letta:8283
-    command: python3 /app/register_tools.py
-    restart: "no"
-    networks:
-      - navigator-network
+  # tool_registrar:
+  #   image: letta-with-tools:latest
+  #   depends_on:
+  #     letta:
+  #       condition: service_healthy
+  #   environment:
+  #     - LETTA_BASE_URL=http://letta:8283
+  #   command: python3 /app/register_tools.py
+  #   restart: "no"
+  #   networks:
+  #     - navigator-network
 
   navigator-web:
     container_name: navigator-web
@@ -131,4 +131,4 @@ services:
       - postgres
       - navigator-api
       - navigator-web
-      - letta
+      # - letta
