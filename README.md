@@ -40,7 +40,6 @@ I'm hoping that's flexible enough to be plugged into your preferred deployment s
 ## What's in here?
 Check out `docker-compose.yaml` to see the specifics. In launch order...
 - PostgreSQL 17 with pgvector
-- LocalStack (though unused at the moment)
 - Letta AI, a stateful ai agent microservice
 - A helper which registers Letta's tools
 - AdonisJS backend serving most of the app's endpoints

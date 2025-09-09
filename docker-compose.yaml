@@ -36,17 +36,17 @@ services:
       timeout: 5s
       retries: 5
 
-  localstack:
-    container_name: navigator-localstack
-    image: localstack/localstack:latest
-    expose:
-      - "4566"
-    env_file:
-      - .env.localstack
-    volumes:
-      - ./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
-    networks:
-      - navigator-network
+  # localstack:
+  #   container_name: navigator-localstack
+  #   image: localstack/localstack:latest
+  #   expose:
+  #     - "4566"
+  #   env_file:
+  #     - .env.localstack
+  #   volumes:
+  #     - ./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
+  #   networks:
+  #     - navigator-network
 
   navigator-api:
     container_name: navigator-api
