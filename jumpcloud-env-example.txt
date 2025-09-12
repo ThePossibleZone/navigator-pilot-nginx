@@ -1,0 +1,16 @@
+# JumpCloud SSO Configuration
+# Add these to your .env.api file
+
+# JumpCloud SAML Configuration
+JUMPCLOUD_SSO_URL=https://your-org.jumpcloud.com/saml2/your-app
+JUMPCLOUD_ENTITY_ID=navigator-app
+JUMPCLOUD_CERTIFICATE="-----BEGIN CERTIFICATE-----\nYour JumpCloud X.509 Certificate Here\n-----END CERTIFICATE-----"
+JUMPCLOUD_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour Private Key Here\n-----END PRIVATE KEY-----"
+
+# Application URLs
+FRONTEND_URL=http://localhost:5173
+APP_URL=http://localhost:3333
+
+# Add these to your .env.web file
+VITE_API_BASE_URL=http://localhost
+VITE_JUMPCLOUD_ENABLED=true
